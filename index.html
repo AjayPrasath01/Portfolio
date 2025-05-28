@@ -3,27 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajay Prasath - Senior Product Developer</title>
-    <meta name="description" content="Results-driven Senior Product Developer with 2+ years of experience in full-stack development">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Ajay Prasath - 3D Portfolio</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loader">
             <div class="cube">
-                <div class="face front"></div>
-                <div class="face back"></div>
-                <div class="face right"></div>
-                <div class="face left"></div>
-                <div class="face top"></div>
-                <div class="face bottom"></div>
+                <div></div><div></div><div></div><div></div><div></div><div></div>
             </div>
             <p>Loading Portfolio...</p>
         </div>
@@ -31,129 +21,140 @@
 
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-text">AP</span>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="#hero" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
-                <li class="nav-item"><a href="#experience" class="nav-link">Experience</a></li>
-                <li class="nav-item"><a href="#projects" class="nav-link">Projects</a></li>
-                <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+        <div class="nav-brand">
+            <span class="logo">AP</span>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="#hero" class="nav-link">Home</a></li>
+            <li><a href="#about" class="nav-link">About</a></li>
+            <li><a href="#experience" class="nav-link">Experience</a></li>
+            <li><a href="#projects" class="nav-link">Projects</a></li>
+            <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+        <div class="hamburger">
+            <span></span><span></span><span></span>
         </div>
     </nav>
 
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
     <!-- Hero Section -->
     <section id="hero" class="hero">
-        <div id="hero-canvas"></div>
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title">
-                    <span class="title-line">AJAY</span>
-                    <span class="title-line">PRASATH</span>
+                    <span class="gradient-text">AJAY PRASATH</span>
                 </h1>
-                <p class="hero-subtitle">Senior Product Developer</p>
-                <p class="hero-description">"Focused on building high-performance, maintainable software solutions while adapting to new technologies to solve complex problems."</p>
+                <h2 class="hero-subtitle">Senior Product Developer</h2>
+                <p class="hero-description">
+                    Building high-performance, maintainable software solutions while adapting to new technologies to solve complex problems.
+                </p>
                 <div class="hero-buttons">
-                    <a href="#contact" class="btn btn-primary">Get In Touch</a>
-                    <a href="#projects" class="btn btn-secondary">View Projects</a>
+                    <a href="#projects" class="btn btn-primary">View Projects</a>
+                    <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+                </div>
+                <div class="hero-social">
+                    <a href="https://www.linkedin.com/in/ajay-prasath-r-b56779210" target="_blank" class="social-link">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="mailto:prasathajay01@gmail.com" class="social-link">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="https://ajay.today" target="_blank" class="social-link">
+                        <i class="fas fa-globe"></i>
+                    </a>
                 </div>
             </div>
-            <div class="hero-info">
-                <div class="info-item">
-                    <span class="info-label">Location</span>
-                    <span class="info-value">India</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Experience</span>
-                    <span class="info-value">2+ Years</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Specialization</span>
-                    <span class="info-value">Full-Stack Development</span>
-                </div>
+            <div class="hero-3d">
+                <canvas id="hero-canvas"></canvas>
             </div>
         </div>
         <div class="scroll-indicator">
-            <div class="scroll-line"></div>
-            <span>Scroll</span>
+            <div class="scroll-arrow"></div>
         </div>
     </section>
 
     <!-- About Section -->
     <section id="about" class="about">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">About Me</h2>
-                <div class="section-line"></div>
-            </div>
+            <h2 class="section-title">About Me</h2>
             <div class="about-content">
                 <div class="about-text">
-                    <p>Results-driven Senior Product Developer with 2+ years of experience in full-stack development (Node Js, React, AWS) and a proven track record of owning critical modules, leading releases, and guiding system architecture.</p>
-                    <p>Skilled in DevOps practices (Jenkins, Docker), cloud deployment, and database optimization (Postgres, Opensearch). Adept at collaborating across teams, conducting code reviews, and ensuring timely, high-quality feature delivery.</p>
-                    <p>Focused on performance, maintainability, and reducing technical debt in fast-paced, agile environments.</p>
-                </div>
-                <div class="skills-container">
-                    <div class="skills-category">
-                        <h3>Tech Skills</h3>
-                        <div class="skills-grid">
-                            <span class="skill-tag">Node.js</span>
-                            <span class="skill-tag">Java</span>
-                            <span class="skill-tag">Spring Boot</span>
-                            <span class="skill-tag">JavaScript</span>
-                            <span class="skill-tag">React</span>
-                            <span class="skill-tag">Python</span>
-                            <span class="skill-tag">Postgres</span>
-                            <span class="skill-tag">Redis</span>
-                            <span class="skill-tag">Docker</span>
-                            <span class="skill-tag">Jenkins</span>
-                            <span class="skill-tag">AWS</span>
-                            <span class="skill-tag">CI/CD</span>
+                    <p class="about-intro">
+                        Results-driven Senior Product Developer with 2+ years of experience in full-stack development (Node.js, React, AWS) and a proven track record of owning critical modules, leading releases, and guiding system architecture.
+                    </p>
+                    <div class="about-details">
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>India</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+91 8220730199</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>prasathajay01@gmail.com</span>
                         </div>
                     </div>
-                    <div class="skills-category">
-                        <h3>Functional Skills</h3>
-                        <div class="skills-grid">
-                            <span class="skill-tag">System Design</span>
-                            <span class="skill-tag">Module Ownership</span>
-                            <span class="skill-tag">Project Management</span>
-                            <span class="skill-tag">Cross-functional Collaboration</span>
-                            <span class="skill-tag">Code Reviews</span>
-                            <span class="skill-tag">Database Optimization</span>
-                            <span class="skill-tag">Agile Development</span>
-                            <span class="skill-tag">Team Mentorship</span>
-                        </div>
+                </div>
+                <div class="about-3d">
+                    <canvas id="about-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <h2 class="section-title">Key Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Tech Skills</h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">Java</span>
+                        <span class="skill-tag">Spring Boot</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Postgres</span>
+                        <span class="skill-tag">Redis</span>
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">Jenkins</span>
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">CI/CD</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Functional Skills</h3>
+                    <div class="skill-tags">
+                        <span class="skill-tag">System Design</span>
+                        <span class="skill-tag">Module Ownership</span>
+                        <span class="skill-tag">Project Management</span>
+                        <span class="skill-tag">Code Reviews</span>
+                        <span class="skill-tag">Database Optimization</span>
+                        <span class="skill-tag">Agile Development</span>
+                        <span class="skill-tag">Team Mentorship</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="about-canvas"></div>
     </section>
 
     <!-- Experience Section -->
     <section id="experience" class="experience">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Professional Experience</h2>
-                <div class="section-line"></div>
-            </div>
+            <h2 class="section-title">Professional Experience</h2>
             <div class="timeline">
                 <div class="timeline-item">
-                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">May 2025 - Present</div>
                     <div class="timeline-content">
-                        <div class="job-header">
-                            <h3>Senior Product Developer</h3>
-                            <span class="company">SurveySparrow, Chennai, India</span>
-                            <span class="duration">May 2025 - Present</span>
-                        </div>
-                        <ul class="job-highlights">
+                        <h3>Senior Product Developer</h3>
+                        <h4>SurveySparrow, Chennai, India</h4>
+                        <ul>
                             <li>Owned the Ticket Management module end-to-end, including architecture decisions, development, testing, and production rollout</li>
                             <li>Led feature planning and release coordination with cross-functional teams</li>
                             <li>Conducted comprehensive PR reviews to maintain code quality and mentor junior developers</li>
@@ -162,33 +163,27 @@
                     </div>
                 </div>
                 <div class="timeline-item">
-                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">May 2023 - May 2025</div>
                     <div class="timeline-content">
-                        <div class="job-header">
-                            <h3>Product Developer</h3>
-                            <span class="company">SurveySparrow, Chennai, India</span>
-                            <span class="duration">May 2023 - May 2025</span>
-                        </div>
-                        <ul class="job-highlights">
-                            <li>Developed and documented multiple RESTful APIs for seamless integration</li>
+                        <h3>Product Developer</h3>
+                        <h4>SurveySparrow, Chennai, India</h4>
+                        <ul>
+                            <li>Developed and documented multiple RESTful APIs, ensuring seamless integration</li>
                             <li>Resolved critical bugs and delivered 25+ feature enhancements</li>
-                            <li>Owned end-to-end development of 3+ stories aligned with product roadmap</li>
-                            <li>Implemented Blue-Green Deployment strategies for zero-downtime releases</li>
+                            <li>Owned end-to-end development of 3+ stories</li>
+                            <li>Followed Blue-Green Deployment strategies for zero-downtime releases</li>
                         </ul>
                     </div>
                 </div>
                 <div class="timeline-item">
-                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">Jan 2023 - May 2023</div>
                     <div class="timeline-content">
-                        <div class="job-header">
-                            <h3>Product Developer - Intern</h3>
-                            <span class="company">SurveySparrow, Chennai, India</span>
-                            <span class="duration">Jan 2023 - May 2023</span>
-                        </div>
-                        <ul class="job-highlights">
-                            <li>Integrated SonarQube into pull request workflows, reducing vulnerabilities by 5%</li>
-                            <li>Developed custom ESLint rules and automated CI/CD workflows via Jenkins</li>
-                            <li>Worked on AWS services (Lambda, EC2, ALB, S3, VPC) for scalable infrastructure</li>
+                        <h3>Product Developer - Intern</h3>
+                        <h4>SurveySparrow, Chennai, India</h4>
+                        <ul>
+                            <li>Integrated SonarQube into pull request workflows</li>
+                            <li>Developed custom ESLint rules and automated CI/CD workflows</li>
+                            <li>Worked on AWS services (Lambda, EC2, ALB, S3, VPC)</li>
                             <li>Developed scalable unit and API testing frameworks</li>
                         </ul>
                     </div>
@@ -200,15 +195,14 @@
     <!-- Projects Section -->
     <section id="projects" class="projects">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Featured Projects</h2>
-                <div class="section-line"></div>
-            </div>
+            <h2 class="section-title">Featured Projects</h2>
             <div class="projects-grid">
                 <div class="project-card">
-                    <div class="project-icon">🚀</div>
+                    <div class="project-icon">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
                     <h3>Binance Crypto Analyzer</h3>
-                    <p>Developed an application utilizing Binance's API to extract and analyze cryptocurrency market data for investment insights.</p>
+                    <p>Real-time cryptocurrency market analysis using Binance API for investment insights</p>
                     <div class="project-tech">
                         <span>Python</span>
                         <span>Binance API</span>
@@ -216,99 +210,76 @@
                     </div>
                 </div>
                 <div class="project-card">
-                    <div class="project-icon">🏭</div>
+                    <div class="project-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
                     <h3>CNC IoT Monitoring</h3>
-                    <p>Designed an IoT-based system for real-time monitoring and analysis of CNC machinery with operational insights.</p>
+                    <p>IoT-based system for real-time CNC machinery monitoring and analysis</p>
                     <div class="project-tech">
                         <span>Spring Boot</span>
                         <span>React</span>
-                        <span>MySQL</span>
                         <span>GCP</span>
+                        <span>Arduino</span>
                     </div>
                 </div>
                 <div class="project-card">
-                    <div class="project-icon">📱</div>
-                    <h3>SRM Mania - Android App</h3>
-                    <p>Created an independent Android application for mobile web scraping, functioning autonomously without backend support.</p>
+                    <div class="project-icon">
+                        <i class="fab fa-android"></i>
+                    </div>
+                    <h3>SRM Mania App</h3>
+                    <p>Independent Android app with mobile web scraping capabilities</p>
                     <div class="project-tech">
                         <span>Android Studio</span>
                         <span>Java</span>
-                        <span>XML</span>
                         <span>JavaScript</span>
                     </div>
                 </div>
                 <div class="project-card">
-                    <div class="project-icon">🤖</div>
+                    <div class="project-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
                     <h3>AI Detection App</h3>
-                    <p>Developed a mobile app integrating TensorFlow Lite for on-device object and sound detection, prioritizing user privacy.</p>
+                    <p>Mobile app with TensorFlow Lite for object and sound detection</p>
                     <div class="project-tech">
-                        <span>Android Studio</span>
                         <span>TensorFlow</span>
+                        <span>Android Studio</span>
                         <span>Java</span>
-                        <span>XML</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="projects-canvas"></div>
     </section>
 
     <!-- Contact Section -->
     <section id="contact" class="contact">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Get In Touch</h2>
-                <div class="section-line"></div>
-            </div>
+            <h2 class="section-title">Get In Touch</h2>
             <div class="contact-content">
                 <div class="contact-info">
                     <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div class="contact-details">
+                        <i class="fas fa-envelope"></i>
+                        <div>
                             <h4>Email</h4>
-                            <a href="mailto:prasathajay01@gmail.com">prasathajay01@gmail.com</a>
+                            <p>prasathajay01@gmail.com</p>
                         </div>
                     </div>
                     <div class="contact-item">
-                        <div class="contact-icon">📱</div>
-                        <div class="contact-details">
+                        <i class="fas fa-phone"></i>
+                        <div>
                             <h4>Phone</h4>
-                            <a href="tel:+918220730199">+91 8220730199</a>
+                            <p>+91 8220730199</p>
                         </div>
                     </div>
                     <div class="contact-item">
-                        <div class="contact-icon">🌐</div>
-                        <div class="contact-details">
+                        <i class="fas fa-globe"></i>
+                        <div>
                             <h4>Portfolio</h4>
-                            <a href="https://ajay.today" target="_blank">ajay.today</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">💼</div>
-                        <div class="contact-details">
-                            <h4>LinkedIn</h4>
-                            <a href="https://www.linkedin.com/in/ajay-prasath-r-b56779210" target="_blank">Connect with me</a>
+                            <p>https://ajay.today</p>
                         </div>
                     </div>
                 </div>
-                <div class="education-certifications">
-                    <div class="education">
-                        <h3>Education</h3>
-                        <div class="education-item">
-                            <h4>B.Tech in Mechanical Engineering</h4>
-                            <p>SRM University, Chennai, India (2023)</p>
-                            <span class="cgpa">8.6 CGPA</span>
-                        </div>
-                    </div>
-                    <div class="certifications">
-                        <h3>Certifications</h3>
-                        <ul>
-                            <li>Python Programming — GUVI</li>
-                            <li>Android App Development — KYRION</li>
-                            <li>Ethical Hacking Workshop — MyCaptain</li>
-                            <li>Data Analysis with Python — MyCaptain</li>
-                        </ul>
-                    </div>
+                <div class="contact-3d">
+                    <canvas id="contact-canvas"></canvas>
                 </div>
             </div>
         </div>
@@ -321,6 +292,8 @@
         </div>
     </footer>
 
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 
