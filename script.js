@@ -458,12 +458,19 @@ class Navigation {
             const scrollY = window.scrollY;
             
             if (scrollY > 50 && !this.scrolled) {
-                this.navbar.style.transform = 'translateY(-10px)';
-                this.navbar.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.2)';
+                // Remove transform that interferes with fixed positioning
+                // Instead, enhance backdrop blur and shadow for scroll effect
+                this.navbar.style.backdropFilter = 'blur(25px)';
+                this.navbar.style.background = 'rgba(10, 10, 10, 0.98)';
+                this.navbar.style.boxShadow = '0 8px 32px rgba(102, 126, 234, 0.15)';
+                this.navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.15)';
                 this.scrolled = true;
             } else if (scrollY <= 50 && this.scrolled) {
-                this.navbar.style.transform = 'translateY(0)';
+                // Reset to original state
+                this.navbar.style.backdropFilter = 'blur(20px)';
+                this.navbar.style.background = 'rgba(10, 10, 10, 0.95)';
                 this.navbar.style.boxShadow = 'none';
+                this.navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
                 this.scrolled = false;
             }
         });
@@ -655,44 +662,148 @@ function initParallaxEffect() {
     });
 }
 
-// Enhanced Page Loading Animation
-function initPageLoader() {
-    window.addEventListener('load', () => {
-        const loader = document.createElement('div');
-        loader.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease;
-        `;
+// Enhanced Portfolio Loading System
+function initPortfolioLoader() {
+    const loader = document.getElementById('portfolio-loader');
+    const progressFill = document.querySelector('.progress-fill');
+    const loadingText = document.getElementById('loading-text');
+    const loadingPercent = document.getElementById('loading-percent');
+    
+    if (!loader) return;
+    
+    // Add loading class to body to hide content
+    document.body.classList.add('loading');
+    
+    // Loading steps with realistic timing
+    const loadingSteps = [
+        { text: 'Initializing...', duration: 300, progress: 10 },
+        { text: 'Loading 3D Environment...', duration: 800, progress: 25 },
+        { text: 'Preparing Assets...', duration: 600, progress: 45 },
+        { text: 'Setting up Navigation...', duration: 400, progress: 60 },
+        { text: 'Loading Content...', duration: 500, progress: 75 },
+        { text: 'Optimizing Performance...', duration: 400, progress: 90 },
+        { text: 'Ready!', duration: 200, progress: 100 }
+    ];
+    
+    let currentStep = 0;
+    let currentProgress = 0;
+    
+    function updateProgress(targetProgress, text) {
+        return new Promise((resolve) => {
+            const startProgress = currentProgress;
+            const progressDiff = targetProgress - startProgress;
+            const duration = 300;
+            const startTime = performance.now();
+            
+            if (loadingText) loadingText.textContent = text;
+            
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Smooth easing function
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                currentProgress = startProgress + (progressDiff * easeProgress);
+                
+                if (progressFill) {
+                    progressFill.style.width = `${currentProgress}%`;
+                }
+                if (loadingPercent) {
+                    loadingPercent.textContent = `${Math.round(currentProgress)}%`;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        });
+    }
+    
+    async function runLoadingSequence() {
+        // Wait for initial DOM to be ready
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        loader.innerHTML = `
-            <div style="
-                width: 50px;
-                height: 50px;
-                border: 3px solid rgba(102, 126, 234, 0.3);
-                border-top: 3px solid #667eea;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            "></div>
-        `;
+        // Run through all loading steps
+        for (const step of loadingSteps) {
+            await updateProgress(step.progress, step.text);
+            await new Promise(resolve => setTimeout(resolve, step.duration));
+        }
         
-        document.body.appendChild(loader);
+        // Final completion step
+        await new Promise(resolve => setTimeout(resolve, 500));
         
+        // Trigger completion
+        completeLoading();
+    }
+    
+    function completeLoading() {
+        // Add exit animation to loader content
+        const loaderContent = document.querySelector('.loader-content');
+        if (loaderContent) {
+            loaderContent.classList.add('exit');
+        }
+        
+        // Start fade-out sequence
         setTimeout(() => {
-            loader.style.opacity = '0';
+            loader.classList.add('fade-out');
+        }, 400);
+        
+        // Remove loading class from body to prepare for reveal
+        setTimeout(() => {
+            document.body.classList.remove('loading');
+            document.body.classList.add('portfolio-reveal');
+        }, 800);
+        
+        // Remove the loader from DOM after transition
+        setTimeout(() => {
+            if (loader && loader.parentNode) {
+                loader.parentNode.removeChild(loader);
+            }
+            
+            // Initialize portfolio components after loading screen is removed
+            initializePortfolioComponents();
+        }, 1200);
+    }
+    
+    function initializePortfolioComponents() {
+        // Initialize all portfolio components in sequence
+        try {
+            console.log('Portfolio loading complete - initializing components...');
+            
+            // Initialize Three.js background
+            initThreeJS();
+            
+            // Initialize other components with staggered timing for better performance
             setTimeout(() => {
-                document.body.removeChild(loader);
-            }, 500);
-        }, 1000);
-    });
+                initSmoothScrolling();
+                initScrollAnimations();
+                initStatsCounter();
+                initParallaxEffect();
+                
+                // Initialize navigation
+                const nav = new Navigation();
+                nav.init();
+                
+                console.log('All portfolio components initialized successfully');
+                
+                // Clean up reveal class after all animations complete
+                setTimeout(() => {
+                    document.body.classList.remove('portfolio-reveal');
+                }, 2000);
+                
+            }, 200);
+            
+        } catch (error) {
+            console.error('Error initializing portfolio components:', error);
+        }
+    }
+    
+    // Start the loading sequence
+    runLoadingSequence();
 }
 
 // Initialize everything when DOM is loaded
@@ -708,27 +819,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.cursor = 'auto';
     } else {
         document.body.classList.remove('mobile-device');
-        // Initialize custom cursor only on desktop
+        // Initialize custom cursor only on desktop - delayed until after loading
         setTimeout(() => {
             initCustomCursor();
-        }, 100);
+        }, 1500);
     }
     
-    // Initialize Three.js background
-    initThreeJS();
-    
-    // Initialize other components
-    setTimeout(() => {
-        initSmoothScrolling();
-        initScrollAnimations();
-        initStatsCounter();
-        initParallaxEffect();
-        initPageLoader();
-        
-        // Initialize navigation
-        const nav = new Navigation();
-        nav.init();
-    }, 200);
+    // Start the enhanced portfolio loader
+    initPortfolioLoader();
     
     // Handle window resize
     let resizeTimeout;
