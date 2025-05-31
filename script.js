@@ -377,279 +377,58 @@ function onWindowResize() {
     }
 }
 
-// Enhanced Custom Cursor - Complete cursor replacement
+// Disabled custom cursor - using normal system cursor
 function initCustomCursor() {
-    // Check if mobile device
-    if (window.innerWidth <= 768 || 'ontouchstart' in window) {
-        return; // Don't initialize custom cursor on mobile
-    }
+    // Custom cursor disabled - using normal system cursor for better compatibility
+    console.log('Custom cursor disabled - using normal system cursor');
     
-    // Force hide default cursor completely
-    document.documentElement.style.cursor = 'none';
-    document.body.style.cursor = 'none';
-    
-    // Add CSS rule to override any cursor styles
-    const style = document.createElement('style');
-    style.textContent = `
-        *, *::before, *::after {
-            cursor: none !important;
+    // Ensure normal cursor is visible everywhere
+    const normalCursorCSS = document.createElement('style');
+    normalCursorCSS.innerHTML = `
+        /* Ensure normal cursor is visible on all elements */
+        *, *:before, *:after, 
+        html, body, div, section, nav, a, button, input, textarea, 
+        .hero, .about, .skills, .experience, .projects, .education, .contact,
+        .nav-link, .btn, .project-card, .skill-item, .timeline-item, .contact-card {
+            cursor: auto !important;
         }
-        body, html {
-            cursor: none !important;
+        
+        /* Specific cursor styles for interactive elements */
+        a, button, .btn, .nav-link, .hamburger,
+        .project-card, .skill-item, .timeline-item, .contact-card,
+        .stat, .cert-item, .education-item, .contact-item a,
+        input, textarea, select {
+            cursor: pointer !important;
+        }
+        
+        /* Text cursor for text inputs */
+        input[type="text"], input[type="email"], textarea {
+            cursor: text !important;
+        }
+        
+        /* Remove any existing custom cursor elements */
+        .cursor, .cursor-follower, .custom-cursor, .custom-cursor-follower {
+            display: none !important;
+            visibility: hidden !important;
         }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(normalCursorCSS);
     
-    // Remove any existing cursors first
-    const existingCursors = document.querySelectorAll('.cursor, .cursor-follower');
-    existingCursors.forEach(cursor => cursor.remove());
-    
-    // Create cursor elements
-    const cursor = document.createElement('div');
-    const cursorFollower = document.createElement('div');
-    
-    cursor.className = 'cursor';
-    cursorFollower.className = 'cursor-follower';
-    
-    // Ensure cursors are added to body and visible
-    document.body.appendChild(cursor);
-    document.body.appendChild(cursorFollower);
-    
-    // Force initial styles with highest priority
-    cursor.style.cssText = `
-        position: fixed !important;
-        z-index: 2147483647 !important;
-        pointer-events: none !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        width: 20px !important;
-        height: 20px !important;
-        border: 2px solid #00ffff !important;
-        border-radius: 50% !important;
-        mix-blend-mode: difference !important;
-        backdrop-filter: blur(2px) !important;
-        will-change: transform !important;
-        backface-visibility: hidden !important;
-        transform-origin: center center !important;
-    `;
-    
-    cursorFollower.style.cssText = `
-        position: fixed !important;
-        z-index: 2147483646 !important;
-        pointer-events: none !important;
-        visibility: visible !important;
-        opacity: 0.8 !important;
-        display: block !important;
-        width: 40px !important;
-        height: 40px !important;
-        background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.1) 100%) !important;
-        border-radius: 50% !important;
-        will-change: transform !important;
-        backface-visibility: hidden !important;
-        transform-origin: center center !important;
-    `;
-    
-    // Cursor state
-    let isMoving = false;
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let followerX = mouseX;
-    let followerY = mouseY;
-    let isHovering = false;
-    
-    // Set initial position
-    cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    cursorFollower.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    
-    // Throttle function to improve performance
-    function throttle(func, limit) {
-        let inThrottle;
-        return function() {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        }
-    }
-    
-    // Update cursor position with force visibility
-    function updateCursorPosition(e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        isMoving = true;
-        
-        // Force visibility and hide any default cursor
-        document.body.style.cursor = 'none';
-        document.documentElement.style.cursor = 'none';
-        cursor.style.visibility = 'visible';
-        cursor.style.opacity = '1';
-        cursor.style.display = 'block';
-        
-        // Update main cursor immediately with position
-        const scale = isHovering ? 'scale(1.5)' : 'scale(1)';
-        cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) ${scale}`;
-    }
-    
-    // Throttled mouse move handler
-    const throttledMouseMove = throttle(updateCursorPosition, 16); // ~60fps
-    
-    // Global mouse event handlers
-    document.addEventListener('mousemove', throttledMouseMove, { passive: true });
-    window.addEventListener('mousemove', throttledMouseMove, { passive: true });
-    
-    // Handle interactive elements across all sections
-    function handleInteractiveElements() {
-        const interactiveSelectors = [
-            'a', 'button', '.btn', '.nav-link', '.project-card', 
-            '.skill-item', '.contact-card', '.timeline-content',
-            '.stat', '.cert-item', '.education-item',
-            '[role="button"]', 'input', 'textarea'
-        ];
-        
-        const interactiveElements = document.querySelectorAll(interactiveSelectors.join(', '));
-        
-        interactiveElements.forEach(element => {
-            // Force hide cursor on element
-            element.style.cursor = 'none';
-            
-            element.addEventListener('mouseenter', () => {
-                isHovering = true;
-                element.style.cursor = 'none';
-                cursor.style.borderColor = '#ff6b6b';
-                cursor.style.visibility = 'visible';
-                cursor.style.opacity = '1';
-                const scale = 'scale(1.5)';
-                cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) ${scale}`;
-                cursorFollower.style.transform = `translate(${followerX}px, ${followerY}px) translate(-50%, -50%) scale(1.3)`;
-            }, { passive: true });
-            
-            element.addEventListener('mouseleave', () => {
-                isHovering = false;
-                element.style.cursor = 'none';
-                cursor.style.borderColor = '#00ffff';
-                cursor.style.visibility = 'visible';
-                cursor.style.opacity = '1';
-                const scale = 'scale(1)';
-                cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) ${scale}`;
-                cursorFollower.style.transform = `translate(${followerX}px, ${followerY}px) translate(-50%, -50%) scale(1)`;
-            }, { passive: true });
-        });
-    }
-    
-    // Initialize interactive elements
-    handleInteractiveElements();
-    
-    // Smooth follower animation with visibility check
-    let animationId;
-    function animateFollower() {
-        // Ensure cursors are always visible and default cursor is hidden
-        document.body.style.cursor = 'none';
-        document.documentElement.style.cursor = 'none';
-        cursor.style.visibility = 'visible';
-        cursorFollower.style.visibility = 'visible';
-        
-        if (isMoving) {
-            // Smooth following with easing
-            const ease = 0.15;
-            followerX += (mouseX - followerX) * ease;
-            followerY += (mouseY - followerY) * ease;
-            
-            const scale = isHovering ? 'scale(1.3)' : 'scale(1)';
-            cursorFollower.style.transform = `translate(${followerX}px, ${followerY}px) translate(-50%, -50%) ${scale}`;
-            
-            // Stop animation when cursor stops moving
-            if (Math.abs(mouseX - followerX) < 0.1 && Math.abs(mouseY - followerY) < 0.1) {
-                isMoving = false;
-            }
-        }
-        
-        animationId = requestAnimationFrame(animateFollower);
-    }
-    
-    // Start animation
-    animateFollower();
-    
-    // Handle visibility when switching between sections
-    function ensureVisibility() {
-        document.body.style.cursor = 'none';
-        document.documentElement.style.cursor = 'none';
-        cursor.style.visibility = 'visible';
-        cursor.style.opacity = '1';
-        cursor.style.display = 'block';
-        cursorFollower.style.visibility = 'visible';
-        cursorFollower.style.opacity = '0.8';
-        cursorFollower.style.display = 'block';
-    }
-    
-    // Check visibility on scroll
-    window.addEventListener('scroll', ensureVisibility, { passive: true });
-    
-    // Handle window visibility
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            cursor.style.opacity = '0';
-            cursorFollower.style.opacity = '0';
-        } else {
-            ensureVisibility();
-        }
+    // Remove any existing custom cursor elements
+    document.querySelectorAll('.cursor, .cursor-follower, .custom-cursor, .custom-cursor-follower').forEach(el => {
+        el.remove();
     });
     
-    // Handle mouse leave/enter window
-    document.addEventListener('mouseleave', () => {
-        cursor.style.opacity = '0';
-        cursorFollower.style.opacity = '0';
-        isMoving = false;
-    }, { passive: true });
+    // Force normal cursor on body and html
+    document.body.style.cursor = 'auto';
+    document.documentElement.style.cursor = 'auto';
     
-    document.addEventListener('mouseenter', () => {
-        ensureVisibility();
-    }, { passive: true });
-    
-    // Click effect
-    document.addEventListener('click', () => {
-        ensureVisibility();
-        const scale = 'scale(0.8)';
-        cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) ${scale}`;
-        setTimeout(() => {
-            const normalScale = isHovering ? 'scale(1.5)' : 'scale(1)';
-            cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) ${normalScale}`;
-        }, 150);
-    }, { passive: true });
-    
-    // Cleanup function
-    window.addEventListener('beforeunload', () => {
-        if (animationId) {
-            cancelAnimationFrame(animationId);
-        }
-    });
-    
-    // Re-initialize interactive elements when DOM changes
-    const observer = new MutationObserver(() => {
-        handleInteractiveElements();
-        ensureVisibility();
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-    
-    // Force visibility check every second as fallback
-    setInterval(() => {
-        ensureVisibility();
-        // Force hide default cursor repeatedly
-        document.body.style.cursor = 'none';
-        document.documentElement.style.cursor = 'none';
-    }, 1000);
+    console.log('Normal system cursor enabled for all sections');
 }
 
 function updateCustomCursor(x, y) {
-    const cursor = document.querySelector('.cursor');
-    const follower = document.querySelector('.cursor-follower');
+    const cursor = document.querySelector('.custom-cursor');
+    const follower = document.querySelector('.custom-cursor-follower');
     
     if (cursor) {
         cursor.style.left = x + 'px';
@@ -775,6 +554,25 @@ function initScrollAnimations() {
                     element.style.opacity = '1';
                 } else if (element.classList.contains('timeline-item')) {
                     element.style.transform = 'translateX(0) rotateY(0)';
+                    element.style.opacity = '1';
+                } else if (element.classList.contains('contact-card')) {
+                    // Handle contact cards with their specific rotations
+                    const contactCards = document.querySelectorAll('.contact-card');
+                    const cardIndex = Array.from(contactCards).indexOf(element);
+                    
+                    if (cardIndex === 0) {
+                        // First card: -10deg rotation with translateY(12px)
+                        element.style.transform = 'translateY(12px) rotate(-10deg)';
+                    } else if (cardIndex === 1) {
+                        // Second card: +8deg rotation with translateY(-8px)
+                        element.style.transform = 'translateY(-8px) rotate(8deg)';
+                    } else if (cardIndex === 2) {
+                        // Third card: -6deg rotation with translateY(10px)
+                        element.style.transform = 'translateY(10px) rotate(-6deg)';
+                    } else {
+                        // Fallback for any additional cards
+                        element.style.transform = 'translateY(0) rotate(-3deg)';
+                    }
                     element.style.opacity = '1';
                 } else {
                     element.style.transform = 'translateY(0)';

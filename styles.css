@@ -94,15 +94,19 @@ body {
 
 /* Enhanced Navigation with 3D effects */
 .navbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
     background: rgba(10, 10, 10, 0.95);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1000 !important;
     transition: all 0.3s ease;
     transform-style: preserve-3d;
+    height: 70px;
+    display: flex;
+    align-items: center;
 }
 
 .navbar::before {
@@ -1083,6 +1087,24 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
+    /* Add default tilt effect */
+    transform: rotate(-2deg);
+}
+
+/* Individual card tilt effects */
+.contact-card:nth-child(1) {
+    transform: rotate(-10deg) translateY(12px);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.contact-card:nth-child(2) {
+    transform: rotate(8deg) translateY(-8px);
+    background: rgba(102, 126, 234, 0.08);
+}
+
+.contact-card:nth-child(3) {
+    transform: rotate(-6deg) translateY(10px);
+    background: rgba(118, 75, 162, 0.08);
 }
 
 .contact-card::before {
@@ -1101,9 +1123,29 @@ body {
 }
 
 .contact-card:hover {
-    transform: translateY(-15px) rotateX(10deg) rotateY(5deg);
-    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
-    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-20px) rotateX(5deg) rotateY(5deg) rotate(0deg) scale(1.05);
+    box-shadow: 0 30px 60px rgba(102, 126, 234, 0.4);
+    background: rgba(102, 126, 234, 0.15);
+    z-index: 10;
+}
+
+/* Enhanced hover effects for individual cards */
+.contact-card:nth-child(1):hover {
+    transform: translateY(-25px) rotateX(8deg) rotateY(-3deg) rotate(2deg) scale(1.08);
+    box-shadow: 0 35px 70px rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.12);
+}
+
+.contact-card:nth-child(2):hover {
+    transform: translateY(-22px) rotateX(6deg) rotateY(4deg) rotate(-1deg) scale(1.06);
+    box-shadow: 0 32px 65px rgba(102, 126, 234, 0.35);
+    background: rgba(102, 126, 234, 0.18);
+}
+
+.contact-card:nth-child(3):hover {
+    transform: translateY(-24px) rotateX(7deg) rotateY(-2deg) rotate(1deg) scale(1.07);
+    box-shadow: 0 34px 68px rgba(118, 75, 162, 0.3);
+    background: rgba(118, 75, 162, 0.15);
 }
 
 .contact-card i {
@@ -1433,7 +1475,7 @@ a, button, input, textarea, select,
     z-index: auto;
 }
 
-*:not(.cursor):not(.cursor-follower) {
+*:not(.cursor):not(.cursor-follower):not(.navbar):not(.nav-container):not(.nav-menu):not(.nav-link):not(.hamburger):not(.logo-text) {
     z-index: auto !important;
     max-width: 100%;
 }
