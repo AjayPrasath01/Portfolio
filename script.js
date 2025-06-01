@@ -1,10 +1,18 @@
 // Three.js 3D Background Animation
-let scene, camera, renderer, particles, particleGeometry, particleMaterial;
+let scene, camera, renderer, particles, geometries;
 let mouseX = 0, mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 let floatingGeometries = [];
 let particleInteractionRadius = 100;
+
+// Glass 3D Object variables
+let glassScene, glassCamera, glassRenderer, glassObject;
+
+// 3D Shapes variables
+let shape1Scene, shape1Camera, shape1Renderer, shape1Object;
+let shape2Scene, shape2Camera, shape2Renderer, shape2Object;
+let shape3Scene, shape3Camera, shape3Renderer, shape3Object;
 
 // Initialize Three.js Scene
 function initThreeJS() {
@@ -65,7 +73,7 @@ function initThreeJS() {
 function createParticles() {
     try {
         const particleCount = window.innerWidth < 768 ? 1000 : 3000;
-        particleGeometry = new THREE.BufferGeometry();
+        geometries = new THREE.BufferGeometry();
         
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
@@ -97,13 +105,13 @@ function createParticles() {
             sizes[i] = Math.random() * 4 + 1;
         }
         
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        particleGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+        geometries.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometries.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometries.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometries.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
         
         // Enhanced particle material with better visual effects
-        particleMaterial = new THREE.PointsMaterial({
+        const particleMaterial = new THREE.PointsMaterial({
             size: 3,
             transparent: true,
             opacity: 0.8,
@@ -113,7 +121,7 @@ function createParticles() {
             sizeAttenuation: true
         });
         
-        particles = new THREE.Points(particleGeometry, particleMaterial);
+        particles = new THREE.Points(geometries, particleMaterial);
         scene.add(particles);
         
         console.log(`Created ${particleCount} particles`);
@@ -123,7 +131,7 @@ function createParticles() {
     }
 }
 
-// Enhanced Floating Geometries with more complex shapes
+// Enhanced Floating Geometries with vibrant colors and glowing trails
 function createFloatingGeometries() {
     try {
         const geometries = [
@@ -136,59 +144,134 @@ function createFloatingGeometries() {
             new THREE.ConeGeometry(15, 30, 8)
         ];
         
-        for (let i = 0; i < 12; i++) {
+        // Vibrant color palette
+        const colorPalette = [
+            0xff6b6b, // Red
+            0x4ecdc4, // Teal
+            0x45b7d1, // Blue
+            0x96ceb4, // Green
+            0xffeaa7, // Yellow
+            0xdda0dd, // Plum
+            0xff9ff3, // Pink
+            0x74b9ff, // Light Blue
+            0xfd79a8, // Hot Pink
+            0x6c5ce7, // Purple
+            0xa29bfe, // Lavender
+            0xfab1a0  // Peach
+        ];
+        
+        for (let i = 0; i < 15; i++) {
             const geometry = geometries[Math.floor(Math.random() * geometries.length)];
+            const baseColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
             
-            // Create wireframe and solid versions
+            // Create glowing wireframe material
             const wireframeMaterial = new THREE.MeshBasicMaterial({
-                color: new THREE.Color().setHSL(0.6 + Math.random() * 0.1, 0.7, 0.5),
+                color: baseColor,
                 transparent: true,
-                opacity: 0.2,
+                opacity: 0.8,
                 wireframe: true
             });
             
-            const solidMaterial = new THREE.MeshLambertMaterial({
-                color: new THREE.Color().setHSL(0.6 + Math.random() * 0.1, 0.5, 0.3),
+            // Create glowing solid material with emission
+            const solidMaterial = new THREE.MeshStandardMaterial({
+                color: baseColor,
                 transparent: true,
-                opacity: 0.1
+                opacity: 0.4,
+                emissive: baseColor,
+                emissiveIntensity: 0.3,
+                roughness: 0.1,
+                metalness: 0.2
+            });
+            
+            // Create inner glow material
+            const innerGlowMaterial = new THREE.MeshBasicMaterial({
+                color: baseColor,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide
             });
             
             const wireframeMesh = new THREE.Mesh(geometry.clone(), wireframeMaterial);
             const solidMesh = new THREE.Mesh(geometry.clone(), solidMaterial);
+            const innerGlowMesh = new THREE.Mesh(geometry.clone(), innerGlowMaterial);
             
-            // Position both meshes
+            // Position all meshes
             const x = (Math.random() - 0.5) * 3000;
             const y = (Math.random() - 0.5) * 3000;
             const z = (Math.random() - 0.5) * 1500;
             
             wireframeMesh.position.set(x, y, z);
             solidMesh.position.set(x, y, z);
+            innerGlowMesh.position.set(x, y, z);
             
             // Random initial rotation
-            wireframeMesh.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                Math.random() * Math.PI
-            );
+            const rotation = {
+                x: Math.random() * Math.PI,
+                y: Math.random() * Math.PI,
+                z: Math.random() * Math.PI
+            };
+            
+            wireframeMesh.rotation.set(rotation.x, rotation.y, rotation.z);
             solidMesh.rotation.copy(wireframeMesh.rotation);
+            innerGlowMesh.rotation.copy(wireframeMesh.rotation);
             
             // Add rotation animation data
             const rotationSpeed = {
-                x: (Math.random() - 0.5) * 0.02,
-                y: (Math.random() - 0.5) * 0.02,
-                z: (Math.random() - 0.5) * 0.02
+                x: (Math.random() - 0.5) * 0.03,
+                y: (Math.random() - 0.5) * 0.03,
+                z: (Math.random() - 0.5) * 0.03
             };
             
-            wireframeMesh.userData = { rotationSpeed };
-            solidMesh.userData = { rotationSpeed };
+            // Store additional data for trail effects
+            wireframeMesh.userData = { 
+                rotationSpeed,
+                baseColor,
+                trail: [],
+                maxTrailLength: 8
+            };
+            solidMesh.userData = { rotationSpeed, baseColor };
+            innerGlowMesh.userData = { rotationSpeed, baseColor };
+            
+            // Create trailing effect particles
+            const trailGeometry = new THREE.BufferGeometry();
+            const trailPositions = new Float32Array(24 * 3); // 8 trail points * 3 coordinates
+            const trailColors = new Float32Array(24 * 3);
+            const trailSizes = new Float32Array(24);
+            
+            for (let j = 0; j < 24; j++) {
+                trailPositions[j] = 0;
+                const color = new THREE.Color(baseColor);
+                trailColors[j * 3] = color.r;
+                trailColors[j * 3 + 1] = color.g;
+                trailColors[j * 3 + 2] = color.b;
+                trailSizes[j] = Math.max(0.1, 1.0 - (j / 24));
+            }
+            
+            trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+            trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3));
+            trailGeometry.setAttribute('size', new THREE.BufferAttribute(trailSizes, 1));
+            
+            const trailMaterial = new THREE.PointsMaterial({
+                size: 8,
+                transparent: true,
+                opacity: 0.7,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            const trailPoints = new THREE.Points(trailGeometry, trailMaterial);
+            wireframeMesh.userData.trailPoints = trailPoints;
             
             scene.add(wireframeMesh);
             scene.add(solidMesh);
+            scene.add(innerGlowMesh);
+            scene.add(trailPoints);
             
-            floatingGeometries.push(wireframeMesh, solidMesh);
+            floatingGeometries.push(wireframeMesh, solidMesh, innerGlowMesh);
         }
         
-        console.log('Created enhanced floating geometries');
+        console.log('Created enhanced floating geometries with glowing trails');
         
     } catch (error) {
         console.error('Error creating floating geometries:', error);
@@ -216,6 +299,118 @@ function createLighting() {
     scene.add(directionalLight);
 }
 
+// Create Glass 3D Object for About Section
+function createGlass3DObject() {
+    try {
+        console.log('Creating glass 3D object...');
+        
+        // Get the glass canvas element
+        const glassCanvas = document.getElementById('glass-canvas');
+        if (!glassCanvas) {
+            console.error('Glass canvas element not found!');
+            return;
+        }
+        
+        // Create separate scene for glass object
+        glassScene = new THREE.Scene();
+        
+        // Create camera for glass object
+        glassCamera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        glassCamera.position.z = 150;
+        
+        // Create renderer for glass object
+        glassRenderer = new THREE.WebGLRenderer({ 
+            canvas: glassCanvas,
+            alpha: true,
+            antialias: true
+        });
+        
+        // Adjust size for mobile devices
+        const isMobile = window.innerWidth <= 768;
+        const canvasSize = isMobile ? 150 : 200;
+        glassRenderer.setSize(canvasSize, canvasSize);
+        glassRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        glassRenderer.setClearColor(0x000000, 0);
+        
+        // Create glass torus geometry
+        const glassGeometry = new THREE.TorusGeometry(40, 15, 16, 100);
+        
+        // Create glass material with transparency and refraction
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x667eea,
+            transparent: true,
+            opacity: 0.3,
+            roughness: 0,
+            metalness: 0,
+            transmission: 0.9,
+            thickness: 10,
+            envMapIntensity: 1.5,
+            clearcoat: 1,
+            clearcoatRoughness: 0,
+            ior: 1.5,
+            side: THREE.DoubleSide
+        });
+        
+        // Create glass mesh
+        glassObject = new THREE.Mesh(glassGeometry, glassMaterial);
+        glassScene.add(glassObject);
+        
+        // Add lighting for glass object
+        const glassAmbientLight = new THREE.AmbientLight(0x404040, 0.4);
+        glassScene.add(glassAmbientLight);
+        
+        const glassPointLight = new THREE.PointLight(0x667eea, 1, 200);
+        glassPointLight.position.set(50, 50, 50);
+        glassScene.add(glassPointLight);
+        
+        const glassPointLight2 = new THREE.PointLight(0x764ba2, 0.8, 200);
+        glassPointLight2.position.set(-50, -50, 50);
+        glassScene.add(glassPointLight2);
+        
+        // Start glass animation
+        animateGlassObject();
+        
+        console.log('Glass 3D object created successfully');
+        
+    } catch (error) {
+        console.error('Error creating glass 3D object:', error);
+    }
+}
+
+// Animate Glass 3D Object
+function animateGlassObject() {
+    if (!glassRenderer || !glassScene || !glassCamera || !glassObject) return;
+    
+    requestAnimationFrame(animateGlassObject);
+    
+    try {
+        const time = Date.now() * 0.001;
+        
+        // Smooth rotation animation
+        glassObject.rotation.x = time * 0.5;
+        glassObject.rotation.y = time * 0.3;
+        glassObject.rotation.z = time * 0.1;
+        
+        // Subtle floating motion
+        glassObject.position.y = Math.sin(time * 2) * 5;
+        glassObject.position.x = Math.cos(time * 1.5) * 3;
+        
+        // Scale pulsing effect
+        const scale = 1 + Math.sin(time * 3) * 0.1;
+        glassObject.scale.setScalar(scale);
+        
+        // Update material opacity based on time for breathing effect
+        if (glassObject.material) {
+            glassObject.material.opacity = 0.3 + Math.sin(time * 2) * 0.1;
+        }
+        
+        glassRenderer.render(glassScene, glassCamera);
+        
+    } catch (error) {
+        console.error('Error in glass animation loop:', error);
+    }
+}
+
 // Enhanced Animation Loop with particle interactions
 function animate() {
     if (!renderer || !scene || !camera) return;
@@ -226,7 +421,7 @@ function animate() {
         const time = Date.now() * 0.0005;
         
         // Enhanced particle animation with mouse interaction
-        if (particles) {
+        if (particles && particles.geometry && particles.geometry.attributes) {
             const positions = particles.geometry.attributes.position.array;
             const velocities = particles.geometry.attributes.velocity.array;
             const colors = particles.geometry.attributes.color.array;
@@ -272,21 +467,7 @@ function animate() {
         }
         
         // Enhanced floating geometries animation
-        floatingGeometries.forEach((mesh, index) => {
-            if (mesh.userData && mesh.userData.rotationSpeed) {
-                mesh.rotation.x += mesh.userData.rotationSpeed.x;
-                mesh.rotation.y += mesh.userData.rotationSpeed.y;
-                mesh.rotation.z += mesh.userData.rotationSpeed.z;
-                
-                // Add floating motion
-                mesh.position.y += Math.sin(time + index) * 0.5;
-                mesh.position.x += Math.cos(time + index * 0.5) * 0.3;
-                
-                // Scale animation
-                const scale = 1 + Math.sin(time + index) * 0.1;
-                mesh.scale.setScalar(scale);
-            }
-        });
+        animateFloatingGeometries();
         
         // Enhanced camera movement
         camera.position.x += (mouseX * 0.01 - camera.position.x) * 0.01;
@@ -296,10 +477,134 @@ function animate() {
         // Camera oscillation
         camera.position.z = 1000 + Math.sin(time) * 50;
         
+        // Render the scene
         renderer.render(scene, camera);
+        
+        // Render Glass 3D Object if it exists
+        if (glassRenderer && glassScene && glassCamera) {
+            glassRenderer.render(glassScene, glassCamera);
+        }
+        
+        // Render 3D Shapes if they exist
+        if (shape1Renderer && shape1Scene && shape1Camera) {
+            shape1Renderer.render(shape1Scene, shape1Camera);
+        }
+        
+        if (shape2Renderer && shape2Scene && shape2Camera) {
+            shape2Renderer.render(shape2Scene, shape2Camera);
+        }
+        
+        if (shape3Renderer && shape3Scene && shape3Camera) {
+            shape3Renderer.render(shape3Scene, shape3Camera);
+        }
         
     } catch (error) {
         console.error('Error in animation loop:', error);
+    }
+}
+
+// Enhanced animation for floating geometries with glowing trails
+function animateFloatingGeometries() {
+    try {
+        floatingGeometries.forEach((mesh, index) => {
+            if (!mesh || !mesh.userData) return;
+            
+            const userData = mesh.userData;
+            const time = Date.now() * 0.001;
+            
+            // Smooth floating motion
+            const floatAmplitude = 30;
+            const floatSpeed = 0.8;
+            mesh.position.y += Math.sin(time * floatSpeed + index) * floatAmplitude * 0.01;
+            mesh.position.x += Math.cos(time * floatSpeed * 0.7 + index) * floatAmplitude * 0.005;
+            
+            // Enhanced rotation with userData
+            if (userData.rotationSpeed) {
+                mesh.rotation.x += userData.rotationSpeed.x;
+                mesh.rotation.y += userData.rotationSpeed.y;
+                mesh.rotation.z += userData.rotationSpeed.z;
+            }
+            
+            // Color pulsing effect for glowing
+            if (mesh.material && userData.baseColor) {
+                const pulseFactor = (Math.sin(time * 2 + index) + 1) / 2;
+                const color = new THREE.Color(userData.baseColor);
+                
+                if (mesh.material.emissive) {
+                    mesh.material.emissive.copy(color);
+                    mesh.material.emissiveIntensity = 0.2 + pulseFactor * 0.3;
+                }
+                
+                // Update opacity for breathing effect
+                mesh.material.opacity = mesh.material.wireframe ? 
+                    0.6 + pulseFactor * 0.3 : 
+                    0.3 + pulseFactor * 0.2;
+            }
+            
+            // Update trailing effect
+            if (userData.trailPoints && userData.trail !== undefined) {
+                // Store current position in trail
+                userData.trail.unshift({
+                    x: mesh.position.x,
+                    y: mesh.position.y,
+                    z: mesh.position.z
+                });
+                
+                // Limit trail length
+                if (userData.trail.length > userData.maxTrailLength) {
+                    userData.trail.pop();
+                }
+                
+                // Update trail points positions
+                const positions = userData.trailPoints.geometry.attributes.position.array;
+                const colors = userData.trailPoints.geometry.attributes.color.array;
+                const sizes = userData.trailPoints.geometry.attributes.size.array;
+                
+                for (let i = 0; i < userData.trail.length; i++) {
+                    const point = userData.trail[i];
+                    const idx = i * 3;
+                    
+                    if (point) {
+                        positions[idx] = point.x;
+                        positions[idx + 1] = point.y;
+                        positions[idx + 2] = point.z;
+                        
+                        // Fade trail
+                        const alpha = 1.0 - (i / userData.maxTrailLength);
+                        const color = new THREE.Color(userData.baseColor);
+                        colors[idx] = color.r;
+                        colors[idx + 1] = color.g;
+                        colors[idx + 2] = color.b;
+                        
+                        sizes[i] = alpha * 15 * (1 + pulseFactor * 0.5);
+                    }
+                }
+                
+                userData.trailPoints.geometry.attributes.position.needsUpdate = true;
+                userData.trailPoints.geometry.attributes.color.needsUpdate = true;
+                userData.trailPoints.geometry.attributes.size.needsUpdate = true;
+                
+                // Update trail material opacity
+                userData.trailPoints.material.opacity = 0.5 + pulseFactor * 0.3;
+            }
+            
+            // Boundary check with wrapping
+            const boundary = 1500;
+            if (Math.abs(mesh.position.x) > boundary) {
+                mesh.position.x = -Math.sign(mesh.position.x) * boundary;
+                if (userData.trail) userData.trail.length = 0; // Clear trail on wrap
+            }
+            if (Math.abs(mesh.position.y) > boundary) {
+                mesh.position.y = -Math.sign(mesh.position.y) * boundary;
+                if (userData.trail) userData.trail.length = 0;
+            }
+            if (Math.abs(mesh.position.z) > 750) {
+                mesh.position.z = -Math.sign(mesh.position.z) * 750;
+                if (userData.trail) userData.trail.length = 0;
+            }
+        });
+    } catch (error) {
+        console.error('Error animating floating geometries:', error);
     }
 }
 
@@ -367,6 +672,15 @@ function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // Update glass object canvas if needed
+    if (glassRenderer && glassCamera) {
+        const isMobile = window.innerWidth <= 768;
+        const canvasSize = isMobile ? 150 : 200;
+        glassRenderer.setSize(canvasSize, canvasSize);
+        glassCamera.aspect = 1;
+        glassCamera.updateProjectionMatrix();
     }
     
     // Update fallback canvas if needed
@@ -777,6 +1091,17 @@ function initPortfolioLoader() {
             // Initialize Three.js background
             initThreeJS();
             
+            // Create Glass 3D Object for About Section
+            setTimeout(() => {
+                createGlass3DObject();
+            }, 500);
+            
+            // Create 3D Shapes for About Section
+            setTimeout(() => {
+                create3DShapes();
+                add3DShapeInteraction();
+            }, 700);
+            
             // Initialize other components with staggered timing for better performance
             setTimeout(() => {
                 initSmoothScrolling();
@@ -834,6 +1159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             onWindowResize();
+            resize3DShapes();
             
             // Reinitialize cursor if switching between mobile/desktop
             const newIsMobile = window.innerWidth <= 768;
@@ -866,4 +1192,327 @@ style.textContent = `
         width: 100% !important;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+// Create 3D Shapes - Simplified and Reliable Version
+function create3DShapes() {
+    try {
+        console.log('Creating 3D Shapes...');
+        
+        // Wait for DOM to be ready
+        if (document.readyState !== 'complete') {
+            window.addEventListener('load', create3DShapes);
+            return;
+        }
+        
+        // Create shapes one by one with error handling
+        createShape1(); // Sphere
+        createShape2(); // Cube  
+        createShape3(); // Pyramid
+        
+        // Start the animation
+        animate3DShapes();
+        
+        console.log('3D Shapes created successfully');
+        
+    } catch (error) {
+        console.error('Error creating 3D shapes:', error);
+    }
+}
+
+// Shape 1: Glowing Sphere
+function createShape1() {
+    try {
+        const canvas = document.getElementById('shape-1-canvas');
+        if (!canvas) {
+            console.warn('Shape 1 canvas not found');
+            return;
+        }
+        
+        console.log('Creating Shape 1 - Sphere');
+        
+        // Set canvas size explicitly
+        canvas.width = 220;
+        canvas.height = 220;
+        canvas.style.width = '220px';
+        canvas.style.height = '220px';
+        
+        // Scene setup
+        shape1Scene = new THREE.Scene();
+        shape1Camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        shape1Camera.position.z = 3;
+        
+        shape1Renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas, 
+            alpha: true, 
+            antialias: true
+        });
+        shape1Renderer.setSize(220, 220);
+        shape1Renderer.setClearColor(0x000000, 0);
+        
+        // Create a simple glowing sphere
+        const geometry = new THREE.SphereGeometry(1, 32, 32);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x4169E1,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        shape1Object = new THREE.Mesh(geometry, material);
+        shape1Scene.add(shape1Object);
+        
+        // Add some lighting
+        const light = new THREE.PointLight(0x4169E1, 2, 100);
+        light.position.set(2, 2, 2);
+        shape1Scene.add(light);
+        
+        // Initial render
+        shape1Renderer.render(shape1Scene, shape1Camera);
+        
+        console.log('Shape 1 created successfully');
+        
+    } catch (error) {
+        console.error('Error creating Shape 1:', error);
+    }
+}
+
+// Shape 2: Rotating Cube
+function createShape2() {
+    try {
+        const canvas = document.getElementById('shape-2-canvas');
+        if (!canvas) {
+            console.warn('Shape 2 canvas not found');
+            return;
+        }
+        
+        console.log('Creating Shape 2 - Cube');
+        
+        // Set canvas size explicitly
+        canvas.width = 180;
+        canvas.height = 180;
+        canvas.style.width = '180px';
+        canvas.style.height = '180px';
+        
+        // Scene setup
+        shape2Scene = new THREE.Scene();
+        shape2Camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        shape2Camera.position.z = 3;
+        
+        shape2Renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas, 
+            alpha: true, 
+            antialias: true
+        });
+        shape2Renderer.setSize(180, 180);
+        shape2Renderer.setClearColor(0x000000, 0);
+        
+        // Create a wireframe cube
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x00ff88,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        shape2Object = new THREE.Mesh(geometry, material);
+        shape2Scene.add(shape2Object);
+        
+        // Add inner solid cube
+        const innerGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const innerMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ff88,
+            transparent: true,
+            opacity: 0.3
+        });
+        
+        const innerCube = new THREE.Mesh(innerGeometry, innerMaterial);
+        shape2Object.add(innerCube);
+        
+        // Initial render
+        shape2Renderer.render(shape2Scene, shape2Camera);
+        
+        console.log('Shape 2 created successfully');
+        
+    } catch (error) {
+        console.error('Error creating Shape 2:', error);
+    }
+}
+
+// Shape 3: Crystal Pyramid
+function createShape3() {
+    try {
+        const canvas = document.getElementById('shape-3-canvas');
+        if (!canvas) {
+            console.warn('Shape 3 canvas not found');
+            return;
+        }
+        
+        console.log('Creating Shape 3 - Pyramid');
+        
+        // Set canvas size explicitly
+        canvas.width = 200;
+        canvas.height = 200;
+        canvas.style.width = '200px';
+        canvas.style.height = '200px';
+        
+        // Scene setup
+        shape3Scene = new THREE.Scene();
+        shape3Camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        shape3Camera.position.z = 3;
+        
+        shape3Renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas, 
+            alpha: true, 
+            antialias: true
+        });
+        shape3Renderer.setSize(200, 200);
+        shape3Renderer.setClearColor(0x000000, 0);
+        
+        // Create a pyramid using cone geometry
+        const geometry = new THREE.ConeGeometry(1, 2, 4);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xff6b35,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        shape3Object = new THREE.Mesh(geometry, material);
+        shape3Scene.add(shape3Object);
+        
+        // Add wireframe overlay
+        const wireframeGeometry = new THREE.ConeGeometry(1.1, 2.1, 4);
+        const wireframeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff6b35,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        
+        const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+        shape3Object.add(wireframe);
+        
+        // Initial render
+        shape3Renderer.render(shape3Scene, shape3Camera);
+        
+        console.log('Shape 3 created successfully');
+        
+    } catch (error) {
+        console.error('Error creating Shape 3:', error);
+    }
+}
+
+// Animation function for all 3D shapes
+function animate3DShapes() {
+    requestAnimationFrame(animate3DShapes);
+    
+    const time = Date.now() * 0.001;
+    
+    try {
+        // Animate Shape 1 (Sphere)
+        if (shape1Object && shape1Renderer && shape1Scene && shape1Camera) {
+            shape1Object.rotation.x = time * 0.5;
+            shape1Object.rotation.y = time * 0.3;
+            
+            // Floating motion
+            shape1Object.position.y = Math.sin(time) * 0.3;
+            
+            shape1Renderer.render(shape1Scene, shape1Camera);
+        }
+        
+        // Animate Shape 2 (Cube)
+        if (shape2Object && shape2Renderer && shape2Scene && shape2Camera) {
+            shape2Object.rotation.x = time * 0.4;
+            shape2Object.rotation.y = time * 0.6;
+            
+            // Floating motion
+            shape2Object.position.y = Math.sin(time + 1) * 0.2;
+            
+            shape2Renderer.render(shape2Scene, shape2Camera);
+        }
+        
+        // Animate Shape 3 (Pyramid)
+        if (shape3Object && shape3Renderer && shape3Scene && shape3Camera) {
+            shape3Object.rotation.x = time * 0.3;
+            shape3Object.rotation.y = time * 0.8;
+            
+            // Floating motion
+            shape3Object.position.y = Math.sin(time + 2) * 0.25;
+            
+            shape3Renderer.render(shape3Scene, shape3Camera);
+        }
+        
+    } catch (error) {
+        console.error('Error in 3D shapes animation:', error);
+    }
+}
+
+// Resize function for 3D shapes
+function resize3DShapes() {
+    const isMobile = window.innerWidth <= 768;
+    const isVerySmall = window.innerWidth <= 480;
+    
+    // Resize Shape 1 (Sphere)
+    if (shape1Renderer && shape1Camera) {
+        const size1 = isVerySmall ? 150 : isMobile ? 180 : 220;
+        shape1Renderer.setSize(size1, size1);
+        shape1Camera.aspect = 1;
+        shape1Camera.updateProjectionMatrix();
+        
+        const canvas1 = document.getElementById('shape-1-canvas');
+        if (canvas1) {
+            canvas1.style.width = size1 + 'px';
+            canvas1.style.height = size1 + 'px';
+        }
+    }
+    
+    // Resize Shape 2 (Cube)
+    if (shape2Renderer && shape2Camera) {
+        const size2 = isVerySmall ? 120 : isMobile ? 150 : 180;
+        shape2Renderer.setSize(size2, size2);
+        shape2Camera.aspect = 1;
+        shape2Camera.updateProjectionMatrix();
+        
+        const canvas2 = document.getElementById('shape-2-canvas');
+        if (canvas2) {
+            canvas2.style.width = size2 + 'px';
+            canvas2.style.height = size2 + 'px';
+        }
+    }
+    
+    // Resize Shape 3 (Pyramid)
+    if (shape3Renderer && shape3Camera) {
+        const size3 = isVerySmall ? 130 : isMobile ? 160 : 200;
+        shape3Renderer.setSize(size3, size3);
+        shape3Camera.aspect = 1;
+        shape3Camera.updateProjectionMatrix();
+        
+        const canvas3 = document.getElementById('shape-3-canvas');
+        if (canvas3) {
+            canvas3.style.width = size3 + 'px';
+            canvas3.style.height = size3 + 'px';
+        }
+    }
+}
+
+// Add 3D shape interaction
+function add3DShapeInteraction() {
+    const canvases = [
+        document.getElementById('shape-1-canvas'),
+        document.getElementById('shape-2-canvas'),
+        document.getElementById('shape-3-canvas')
+    ];
+    
+    canvases.forEach((canvas, index) => {
+        if (canvas) {
+            canvas.addEventListener('mouseenter', () => {
+                canvas.style.transform = 'scale(1.1)';
+                canvas.style.transition = 'transform 0.3s ease';
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                canvas.style.transform = 'scale(1.0)';
+            });
+        }
+    });
+} 
