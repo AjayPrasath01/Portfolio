@@ -4,9 +4,34 @@ let mouseX = 0, mouseY = 0;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 
+// Ensure page starts at top and loading screen is visible immediately
+(function() {
+    // Scroll to top immediately
+    window.scrollTo(0, 0);
+    
+    // Prevent scroll during loading
+    document.documentElement.classList.add('loading');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.classList.add('loading');
+    document.body.style.overflow = 'hidden';
+    
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
+        loadingScreen.style.opacity = '1';
+        loadingScreen.style.visibility = 'visible';
+        loadingScreen.style.position = 'fixed';
+        loadingScreen.style.top = '0';
+        loadingScreen.style.left = '0';
+        loadingScreen.style.width = '100%';
+        loadingScreen.style.height = '100%';
+        loadingScreen.style.zIndex = '9999';
+    }
+})();
+
 // Initialize the portfolio
 document.addEventListener('DOMContentLoaded', function() {
-    // Start loading progress
+    // Start loading progress immediately
     startLoadingProgress();
 
     // Initialize Three.js scenes
@@ -38,15 +63,26 @@ document.addEventListener('DOMContentLoaded', function() {
 function startLoadingProgress() {
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
+    const loadingScreen = document.getElementById('loading-screen');
+    
+    if (!progressFill || !progressText) {
+        console.error('Progress elements not found');
+        // Fallback: hide loading screen after delay
+        setTimeout(() => {
+            hideLoadingScreen();
+        }, 3000);
+        return;
+    }
+    
     let progress = 0;
     
     const loadingSteps = [
-        { progress: 15, message: 'Initializing...', delay: 300 },
-        { progress: 30, message: 'Loading Assets...', delay: 400 },
-        { progress: 50, message: 'Setting up 3D Scenes...', delay: 500 },
-        { progress: 70, message: 'Configuring Animations...', delay: 400 },
-        { progress: 85, message: 'Preparing Interface...', delay: 300 },
-        { progress: 100, message: 'Complete!', delay: 400 }
+        { progress: 15, message: 'Initializing...', delay: 500 },
+        { progress: 30, message: 'Loading Assets...', delay: 600 },
+        { progress: 50, message: 'Setting up 3D Scenes...', delay: 700 },
+        { progress: 70, message: 'Configuring Animations...', delay: 600 },
+        { progress: 85, message: 'Preparing Interface...', delay: 500 },
+        { progress: 100, message: 'Complete!', delay: 700 }
     ];
     
     let currentStep = 0;
@@ -73,21 +109,28 @@ function startLoadingProgress() {
             // Hide loading screen after completion
             setTimeout(() => {
                 hideLoadingScreen();
-            }, 500);
+            }, 1000);
         }
     }
     
-    // Start the progress sequence
-    setTimeout(updateProgress, 100);
+    // Start the progress sequence immediately
+    updateProgress();
 }
 
 // Hide loading screen
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
-    loadingScreen.style.opacity = '0';
-    setTimeout(() => {
-        loadingScreen.style.display = 'none';
-    }, 500);
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            // Re-enable scrolling
+            document.documentElement.classList.remove('loading');
+            document.documentElement.style.overflow = 'auto';
+            document.body.classList.remove('loading');
+            document.body.style.overflow = 'auto';
+        }, 500);
+    }
 }
 
 // Initialize Hero Scene
@@ -397,29 +440,158 @@ function initMobileNav() {
 // Scroll animations
 function initScrollAnimations() {
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px' // Increased margin to prevent rapid triggering
+        threshold: 0.15,
+        rootMargin: '0px 0px -100px 0px'
     };
 
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                // Only animate if not already animated
-                if (!entry.target.classList.contains('animated')) {
-                    entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+                // Add staggered animation delay for multiple elements
+                const delay = entry.target.dataset.delay ? parseInt(entry.target.dataset.delay) : index * 100;
+                
+                setTimeout(() => {
                     entry.target.classList.add('animated');
-                }
-                // Unobserve after animation to prevent re-triggering
+                }, delay);
+                
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    // Observe elements
-    document.querySelectorAll('.timeline-item, .project-card, .skill-tag').forEach(el => {
-        // Add initial state
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
+    // Observe all major elements with appropriate animation classes
+    
+    // Section headers
+    document.querySelectorAll('.section-header').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-down');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Section titles
+    document.querySelectorAll('.section-title').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 200;
+        observer.observe(el);
+    });
+
+    // Timeline items with alternating animations
+    document.querySelectorAll('.timeline-item').forEach((el, index) => {
+        const animationClass = index % 2 === 0 ? 'fade-in-left' : 'fade-in-right';
+        el.classList.add('scroll-animate', animationClass);
+        el.dataset.delay = index * 200;
+        observer.observe(el);
+    });
+
+    // Project cards
+    document.querySelectorAll('.project-card').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'scale-in');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Skill tags
+    document.querySelectorAll('.skill-tag').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 50;
+        observer.observe(el);
+    });
+
+    // About text paragraphs
+    document.querySelectorAll('.about-text p').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-left');
+        el.dataset.delay = index * 200;
+        observer.observe(el);
+    });
+
+    // Skills categories
+    document.querySelectorAll('.skills-category').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-right');
+        el.dataset.delay = index * 300;
+        observer.observe(el);
+    });
+
+    // Contact items
+    document.querySelectorAll('.contact-item').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'scale-in');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Education and certifications
+    document.querySelectorAll('.education, .certifications').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 200;
+        observer.observe(el);
+    });
+
+    // Navigation items (animate on load)
+    document.querySelectorAll('.nav-item').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-down');
+        el.dataset.delay = index * 100;
+        observer.observe(el);
+    });
+
+    // Hero buttons
+    document.querySelectorAll('.hero-buttons .btn').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Project icons
+    document.querySelectorAll('.project-icon').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'rotate-in');
+        el.dataset.delay = index * 100;
+        observer.observe(el);
+    });
+
+    // Job headers
+    document.querySelectorAll('.job-header').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-right');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Job highlights
+    document.querySelectorAll('.job-highlights').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 200;
+        observer.observe(el);
+    });
+
+    // Education items
+    document.querySelectorAll('.education-item').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-left');
+        el.dataset.delay = index * 150;
+        observer.observe(el);
+    });
+
+    // Certification list items
+    document.querySelectorAll('.certifications li').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-right');
+        el.dataset.delay = index * 100;
+        observer.observe(el);
+    });
+
+    // Timeline dots
+    document.querySelectorAll('.timeline-dot').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'scale-in');
+        el.dataset.delay = index * 250;
+        observer.observe(el);
+    });
+
+    // Footer
+    document.querySelectorAll('.footer').forEach((el, index) => {
+        el.classList.add('scroll-animate', 'fade-in-up');
+        el.dataset.delay = index * 100;
+        observer.observe(el);
+    });
+
+    // Generic elements with scroll-animate class
+    document.querySelectorAll('.scroll-animate:not([class*="fade-"]):not([class*="scale-"]):not([class*="rotate-"])').forEach((el, index) => {
+        el.classList.add('fade-in-up');
+        el.dataset.delay = index * 100;
         observer.observe(el);
     });
 }
