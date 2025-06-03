@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize scroll animations
     initScrollAnimations();
 
+    // Initialize navigation highlighting
+    initNavHighlighting();
+
     // Add mouse movement tracking
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     window.addEventListener('resize', onWindowResize, false);
@@ -540,4 +543,39 @@ const optimizedScroll = debounce(() => {
     });
 }, 10);
 
-window.addEventListener('scroll', optimizedScroll); 
+window.addEventListener('scroll', optimizedScroll);
+
+// Navigation highlighting based on scroll position
+function initNavHighlighting() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    function highlightNavigation() {
+        const scrollY = window.pageYOffset;
+        
+        sections.forEach(section => {
+            const sectionHeight = section.offsetHeight;
+            const sectionTop = section.offsetTop - 100; // Offset for better UX
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                // Remove active class from all nav links
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Add active class to current section's nav link
+                const activeLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        });
+    }
+    
+    // Run on scroll
+    window.addEventListener('scroll', highlightNavigation);
+    
+    // Run initially to set correct active state
+    highlightNavigation();
+} 
