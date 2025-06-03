@@ -6,10 +6,8 @@ let windowHalfY = window.innerHeight / 2;
 
 // Initialize the portfolio
 document.addEventListener('DOMContentLoaded', function() {
-    // Hide loading screen after a delay
-    setTimeout(() => {
-        hideLoadingScreen();
-    }, 2000);
+    // Start loading progress
+    startLoadingProgress();
 
     // Initialize Three.js scenes
     initHeroScene();
@@ -35,6 +33,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // Animate
     animate();
 });
+
+// Loading progress system
+function startLoadingProgress() {
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    let progress = 0;
+    
+    const loadingSteps = [
+        { progress: 15, message: 'Initializing...', delay: 300 },
+        { progress: 30, message: 'Loading Assets...', delay: 400 },
+        { progress: 50, message: 'Setting up 3D Scenes...', delay: 500 },
+        { progress: 70, message: 'Configuring Animations...', delay: 400 },
+        { progress: 85, message: 'Preparing Interface...', delay: 300 },
+        { progress: 100, message: 'Complete!', delay: 400 }
+    ];
+    
+    let currentStep = 0;
+    
+    function updateProgress() {
+        if (currentStep < loadingSteps.length) {
+            const step = loadingSteps[currentStep];
+            progress = step.progress;
+            
+            // Update progress bar
+            progressFill.style.width = progress + '%';
+            progressText.textContent = progress + '%';
+            
+            // Update loading message
+            const loadingText = document.querySelector('.loader p');
+            if (loadingText) {
+                loadingText.textContent = step.message;
+            }
+            
+            currentStep++;
+            
+            setTimeout(updateProgress, step.delay);
+        } else {
+            // Hide loading screen after completion
+            setTimeout(() => {
+                hideLoadingScreen();
+            }, 500);
+        }
+    }
+    
+    // Start the progress sequence
+    setTimeout(updateProgress, 100);
+}
 
 // Hide loading screen
 function hideLoadingScreen() {
@@ -307,20 +352,26 @@ function createNetworkVisualization(scene) {
 
 // Smooth scrolling
 function initSmoothScroll() {
-    const navLinks = document.querySelectorAll('.nav-link');
+    // Select both nav links and hero buttons
+    const smoothScrollElements = document.querySelectorAll('.nav-link, .hero-buttons .btn');
     
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
+    smoothScrollElements.forEach(element => {
+        element.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
             
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                targetSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            // Only handle internal links (starting with #)
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                
+                const targetId = href;
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
@@ -502,16 +553,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 500);
     });
 });
-
-// Add loading progress
-let loadProgress = 0;
-const progressInterval = setInterval(() => {
-    loadProgress += Math.random() * 30;
-    if (loadProgress >= 100) {
-        loadProgress = 100;
-        clearInterval(progressInterval);
-    }
-}, 100);
 
 // Performance optimization
 function debounce(func, wait) {
