@@ -31,15 +31,23 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
 }
 
-/* Prevent scrolling during loading */
+/* Prevent scrolling during loading only */
 body.loading {
     overflow: hidden !important;
 }
 
 html.loading {
     overflow: hidden !important;
+}
+
+html {
+    height: 100%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 }
 
 /* Loading Screen - High specificity to override universal selector */
@@ -984,7 +992,7 @@ section {
     transform: rotate(-200deg);
 }
 
-/* Animated states */
+/* Animated states - Fixed transitions */
 .fade-in-up.animated,
 .fade-in-down.animated,
 .fade-in-left.animated,
@@ -994,28 +1002,21 @@ section {
     opacity: 1;
     transform: translate(0) scale(1) rotate(0);
     transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: auto;
 }
 
-/* Scroll animation states */
+/* Clean up animations after completion */
+.scroll-animate.animated {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
+}
+
+/* Scroll animation states - Performance optimizations only */
 .timeline-item, .project-card, .skill-tag {
     will-change: transform, opacity;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-}
-
-.timeline-item:not(.animated), .project-card:not(.animated), .skill-tag:not(.animated) {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: none;
-}
-
-.timeline-item.animated, .project-card.animated, .skill-tag.animated {
-    will-change: auto;
-}
-
-/* Smooth scrolling for the page */
-html {
-    scroll-behavior: smooth;
 }
 
 /* Responsive Design */
@@ -1106,20 +1107,21 @@ html {
     }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Fixed */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--bg-dark-secondary);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
-    border-radius: 4px;
+    border-radius: 3px;
     transition: all 0.3s ease;
+    min-height: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1127,7 +1129,7 @@ html {
     box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
 }
 
-/* Firefox scrollbar */
+/* Firefox scrollbar - Fixed */
 html {
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) var(--bg-dark-secondary);

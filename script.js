@@ -124,11 +124,18 @@ function hideLoadingScreen() {
         loadingScreen.classList.add('hidden');
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-            // Re-enable scrolling
+            // Properly restore scrolling
             document.documentElement.classList.remove('loading');
-            document.documentElement.style.overflow = 'auto';
+            document.documentElement.style.overflow = '';
             document.body.classList.remove('loading');
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = '';
+            
+            // Force scroll position reset
+            window.scrollTo(0, 0);
+            
+            // Ensure body can scroll properly
+            document.body.style.height = '';
+            document.documentElement.style.height = '';
         }, 500);
     }
 }
@@ -452,6 +459,11 @@ function initScrollAnimations() {
                 
                 setTimeout(() => {
                     entry.target.classList.add('animated');
+                    
+                    // Clean up will-change after animation completes
+                    setTimeout(() => {
+                        entry.target.style.willChange = 'auto';
+                    }, 800);
                 }, delay);
                 
                 observer.unobserve(entry.target);
@@ -662,16 +674,21 @@ function animate() {
     }
 }
 
-// Parallax scroll effect
-window.addEventListener('scroll', () => {
+// Optimized parallax scroll effect
+const parallaxEffect = debounce(() => {
     const scrolled = window.pageYOffset;
     const parallax = document.querySelectorAll('.hero-content');
     
-    parallax.forEach(element => {
-        const speed = 0.5;
-        element.style.transform = `translateY(${scrolled * speed}px)`;
-    });
-});
+    // Only apply parallax in hero section
+    if (scrolled < window.innerHeight) {
+        parallax.forEach(element => {
+            const speed = 0.3; // Reduced speed for smoother effect
+            element.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+    }
+}, 16);
+
+window.addEventListener('scroll', parallaxEffect);
 
 // Skill tags animation on hover
 document.addEventListener('DOMContentLoaded', function() {
