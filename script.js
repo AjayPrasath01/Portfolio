@@ -398,19 +398,28 @@ function initMobileNav() {
 function initScrollAnimations() {
     const observerOptions = {
         threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        rootMargin: '0px 0px -100px 0px' // Increased margin to prevent rapid triggering
     };
 
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+                // Only animate if not already animated
+                if (!entry.target.classList.contains('animated')) {
+                    entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+                    entry.target.classList.add('animated');
+                }
+                // Unobserve after animation to prevent re-triggering
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
     // Observe elements
     document.querySelectorAll('.timeline-item, .project-card, .skill-tag').forEach(el => {
+        // Add initial state
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
         observer.observe(el);
     });
 }
@@ -579,10 +588,12 @@ const optimizedScroll = debounce(() => {
         const windowHeight = window.innerHeight;
         
         if (scrolled > sectionTop - windowHeight + 200) {
-            section.classList.add('visible');
+            if (!section.classList.contains('visible')) {
+                section.classList.add('visible');
+            }
         }
     });
-}, 10);
+}, 16); // Reduced to ~60fps for smoother performance
 
 window.addEventListener('scroll', optimizedScroll);
 
@@ -591,7 +602,7 @@ function initNavHighlighting() {
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    function highlightNavigation() {
+    const highlightNavigation = debounce(() => {
         const scrollY = window.pageYOffset;
         
         sections.forEach(section => {
@@ -612,7 +623,7 @@ function initNavHighlighting() {
                 }
             }
         });
-    }
+    }, 16); // Match the scroll handler frequency
     
     // Run on scroll
     window.addEventListener('scroll', highlightNavigation);
